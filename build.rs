@@ -1,4 +1,3 @@
-pub use blake2b_rs::{Blake2b, Blake2bBuilder};
 use includedir_codegen::Compression;
 
 use std::{
@@ -87,8 +86,16 @@ fn main() {
     bundled.build("bundled.rs").expect("build resource bundle");
 }
 
-pub fn new_blake2b() -> Blake2b {
-    Blake2bBuilder::new(32)
+#[cfg(not(target_arch = "wasm32"))]
+pub fn new_blake2b() -> blake2b_rs::Blake2b {
+    blake2b_rs::Blake2bBuilder::new(32)
+        .personal(CKB_HASH_PERSONALIZATION)
+        .build()
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn new_blake2b() -> blake2b_ref::Blake2b {
+    blake2b_ref::Blake2bBuilder::new(32)
         .personal(CKB_HASH_PERSONALIZATION)
         .build()
 }
